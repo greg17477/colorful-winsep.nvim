@@ -101,7 +101,9 @@ function M.render_down(only_2wins)
     sep:horizontal_init(sep_width)
     if not sep._show then
         sep:move(anchor_row, anchor_col)
-        sep:show()
+        if config.opts.horizontal_separator == "enabled" then
+          sep:show()
+        end
     elseif config.opts.animate.enabled == "shift" then
         sep:shift_move(anchor_row, anchor_col)
     else
@@ -143,7 +145,9 @@ function M.render_up(only_2wins)
     sep:horizontal_init(sep_width)
     if not sep._show then
         sep:move(anchor_row, anchor_col)
-        sep:show()
+        if config.opts.horizontal_separator == "enabled" then
+          sep:show()
+        end
     elseif config.opts.animate.enabled == "shift" then
         sep:shift_move(anchor_row, anchor_col)
     else

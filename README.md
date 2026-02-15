@@ -52,6 +52,7 @@ require("colorful-winsep").setup({
     -- choose between "single", "rounded", "bold" and "double".
     -- Or pass a table like this: { "─", "│", "┌", "┐", "└", "┘" },
     border = "bold",
+    horizontal_separator = "disabled", -- enabled / disabled
     excluded_ft = { "packer", "TelescopePrompt", "mason" },
     highlight = nil, -- nil|string|function. See the docs's Highlights section
     animate = {

@@ -3,6 +3,7 @@ M.opts = {
     -- choose between "single", "rounded", "bold" and "double".
     -- Or pass a table like this: { "─", "│", "┌", "┐", "└", "┘" },
     border = "bold",
+    horizontal_separator = "enabled", -- enabled / disabled
     excluded_ft = { "packer", "TelescopePrompt", "mason" },
     highlight = nil, -- nil|string|function. See the docs's Highlights section
     animate = {
