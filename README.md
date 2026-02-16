@@ -52,7 +52,7 @@ require("colorful-winsep").setup({
     -- choose between "single", "rounded", "bold" and "double".
     -- Or pass a table like this: { "─", "│", "┌", "┐", "└", "┘" },
     border = "bold",
-    horizontal_separator = "disabled", -- enabled / disabled
+    horizontal_separator = "enabled", -- enabled / disabled
     excluded_ft = { "packer", "TelescopePrompt", "mason" },
     highlight = nil, -- nil|string|function. See the docs's Highlights section
     animate = {
@@ -108,12 +108,19 @@ When using the plugin with two windows only, it becomes difficult to discern whi
 The user command of the plugin is `Winsep`, and here comes the subcommands of it:
 | subcommand | function           |
 | ---------- | :-------------:    |
-| enable     | enable the plugin  |
-| disable    | disable the plugin |
-| toggle     | toggle the plugin  |
+| `enable`     | enable the plugin  |
+| `disable`    | disable the plugin |
+| `toggle`     | toggle the plugin  |
 
 ## Highlights
-The highlight's name is `ColorfulWinSep`. You can change it using nvim's builtin function or changing the plugin's configuration
+The plugin uses the following highlight groups:
+- `ColorfulWinSep`: The main highlight group for the window separators.
+- `ColorfulWinSepStart`: The highlight group for the start of the separator (e.g., corners or top of vertical lines).
+- `ColorfulWinSepEnd`: The highlight group for the end of the separator (e.g., corners or bottom of vertical lines).
+
+
+You can change it using nvim's builtin function or changing the plugin's configuration
+
 
 If you want to change it through plugin's setup function, you can pass a string or function to the `highlight` field. When you pass a string, it will work as the fg, and the bg will be set up the same as "Normal" highlight group's bg automatically (see `:h hl-Normal`). When you pass a function, the function will be called when the plugin runs and every time the color scheme is changed.
 

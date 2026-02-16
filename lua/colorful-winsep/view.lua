@@ -16,7 +16,8 @@ M.separators = {
 ---@param only_2wins boolean we should deal with 2 windows situation
 function M.render_left(only_2wins)
     local sep_height = fn.winheight(0)
-    local current_row, current_col = unpack(api.nvim_win_get_position(0))
+    local pos = api.nvim_win_get_position(0)
+    local current_row, current_col = pos[1], pos[2]
     local anchor_row = current_row
     local anchor_col = current_col - 1
     local sep = M.separators.left
@@ -38,22 +39,29 @@ function M.render_left(only_2wins)
         sep_height = sep_height + 1
     end
 
+    local highlight_start = true
+    local highlight_end = true
     if only_2wins then
         anchor_row = sep_height - math.ceil(sep_height / 2)
         sep_height = math.ceil(sep_height / 2)
         if config.opts.indicator_for_2wins.position == "center" then
             sep.start_symbol = config.opts.indicator_for_2wins.symbols.start_left
+            highlight_start = false
         elseif config.opts.indicator_for_2wins.position == "start" then
             sep.start_symbol = config.opts.indicator_for_2wins.symbols.start_left
+            highlight_start = false
         elseif config.opts.indicator_for_2wins.position == "end" then
             sep.end_symbol = config.opts.indicator_for_2wins.symbols.end_left
+            highlight_end = false
         elseif config.opts.indicator_for_2wins.position == "both" then
             sep.start_symbol = config.opts.indicator_for_2wins.symbols.start_left
             sep.end_symbol = config.opts.indicator_for_2wins.symbols.end_left
+            highlight_start = false
+            highlight_end = false
         end
     end
 
-    sep:vertical_init(sep_height)
+    sep:vertical_init(sep_height, highlight_start, highlight_end)
     if not sep._show then
         sep:move(anchor_row, anchor_col)
         sep:show()
@@ -67,7 +75,8 @@ end
 ---@param only_2wins boolean we should deal with 2 windows situation
 function M.render_down(only_2wins)
     local sep_width = fn.winwidth(0)
-    local current_row, current_col = unpack(api.nvim_win_get_position(0))
+    local pos = api.nvim_win_get_position(0)
+    local current_row, current_col = pos[1], pos[2]
     local anchor_row = current_row + fn.winheight(0)
     local anchor_col = current_col
     local sep = M.separators.down
@@ -79,30 +88,33 @@ function M.render_down(only_2wins)
         anchor_row = anchor_row + 1
     end
 
-    if utils.has_adjacent_win(directions.right) then
-        sep.end_symbol = config.opts.border[6]
-        sep_width = sep_width + 1
-    end
+    local highlight_start = true
+    local highlight_end = true
 
     if only_2wins then
         sep_width = math.ceil(sep_width / 2)
         if config.opts.indicator_for_2wins.position == "center" then
             sep.end_symbol = config.opts.indicator_for_2wins.symbols.end_down
+            highlight_end = false
         elseif config.opts.indicator_for_2wins.position == "start" then
             sep.start_symbol = config.opts.indicator_for_2wins.symbols.start_down
+            highlight_start = false
         elseif config.opts.indicator_for_2wins.position == "end" then
             sep.end_symbol = config.opts.indicator_for_2wins.symbols.end_down
+            highlight_end = false
         elseif config.opts.indicator_for_2wins.position == "both" then
             sep.start_symbol = config.opts.indicator_for_2wins.symbols.start_down
             sep.end_symbol = config.opts.indicator_for_2wins.symbols.end_down
+            highlight_start = false
+            highlight_end = false
         end
     end
 
-    sep:horizontal_init(sep_width)
+    sep:horizontal_init(sep_width, highlight_start, highlight_end)
     if not sep._show then
         sep:move(anchor_row, anchor_col)
         if config.opts.horizontal_separator == "enabled" then
-          sep:show()
+            sep:show()
         end
     elseif config.opts.animate.enabled == "shift" then
         sep:shift_move(anchor_row, anchor_col)
@@ -114,7 +126,8 @@ end
 ---@param only_2wins boolean we should deal with 2 windows situation
 function M.render_up(only_2wins)
     local sep_width = fn.winwidth(0)
-    local current_row, current_col = unpack(api.nvim_win_get_position(0))
+    local pos = api.nvim_win_get_position(0)
+    local current_row, current_col = pos[1], pos[2]
     local anchor_row = current_row - 1
     local anchor_col = current_col
     local sep = M.separators.up
@@ -122,31 +135,34 @@ function M.render_up(only_2wins)
     sep.body_symbol = config.opts.border[1]
     sep.end_symbol = config.opts.border[1]
 
-    if utils.has_adjacent_win(directions.right) then
-        sep.end_symbol = config.opts.border[4]
-        sep_width = sep_width + 1
-    end
+    local highlight_start = true
+    local highlight_end = true
 
     if only_2wins then
         anchor_col = sep_width - math.ceil(sep_width / 2)
         sep_width = math.ceil(sep_width / 2)
         if config.opts.indicator_for_2wins.position == "center" then
             sep.start_symbol = config.opts.indicator_for_2wins.symbols.start_up
+            highlight_start = false
         elseif config.opts.indicator_for_2wins.position == "start" then
             sep.start_symbol = config.opts.indicator_for_2wins.symbols.start_up
+            highlight_start = false
         elseif config.opts.indicator_for_2wins.position == "end" then
             sep.end_symbol = config.opts.indicator_for_2wins.symbols.end_up
+            highlight_end = false
         elseif config.opts.indicator_for_2wins.position == "both" then
             sep.start_symbol = config.opts.indicator_for_2wins.symbols.start_up
             sep.end_symbol = config.opts.indicator_for_2wins.symbols.end_up
+            highlight_start = false
+            highlight_end = false
         end
     end
 
-    sep:horizontal_init(sep_width)
+    sep:horizontal_init(sep_width, highlight_start, highlight_end)
     if not sep._show then
         sep:move(anchor_row, anchor_col)
         if config.opts.horizontal_separator == "enabled" then
-          sep:show()
+            sep:show()
         end
     elseif config.opts.animate.enabled == "shift" then
         sep:shift_move(anchor_row, anchor_col)
@@ -158,7 +174,8 @@ end
 ---@param only_2wins boolean we should deal with 2 windows situation
 function M.render_right(only_2wins)
     local sep_height = fn.winheight(0)
-    local current_row, current_col = unpack(api.nvim_win_get_position(0))
+    local pos = api.nvim_win_get_position(0)
+    local current_row, current_col = pos[1], pos[2]
     local anchor_row = current_row
     local anchor_col = current_col + fn.winwidth(0)
     local sep = M.separators.right
@@ -170,21 +187,38 @@ function M.render_right(only_2wins)
         sep_height = sep_height + 1
     end
 
+    if utils.has_adjacent_win(directions.up) then
+        sep.start_symbol = config.opts.border[4]
+        sep_height = sep_height + 1
+        anchor_row = anchor_row - 1
+    end
+    if utils.has_adjacent_win(directions.down) then
+        sep.end_symbol = config.opts.border[6]
+        sep_height = sep_height + 1
+    end
+
+    local highlight_start = true
+    local highlight_end = true
     if only_2wins then
         sep_height = math.ceil(sep_height / 2)
         if config.opts.indicator_for_2wins.position == "center" then
             sep.end_symbol = config.opts.indicator_for_2wins.symbols.end_right
+            highlight_end = false
         elseif config.opts.indicator_for_2wins.position == "start" then
             sep.start_symbol = config.opts.indicator_for_2wins.symbols.start_right
+            highlight_start = false
         elseif config.opts.indicator_for_2wins.position == "end" then
             sep.end_symbol = config.opts.indicator_for_2wins.symbols.end_right
+            highlight_end = false
         elseif config.opts.indicator_for_2wins.position == "both" then
             sep.start_symbol = config.opts.indicator_for_2wins.symbols.start_right
             sep.end_symbol = config.opts.indicator_for_2wins.symbols.end_right
+            highlight_start = false
+            highlight_end = false
         end
     end
 
-    sep:vertical_init(sep_height)
+    sep:vertical_init(sep_height, highlight_start, highlight_end)
     if not sep._show then
         sep:move(anchor_row, anchor_col)
         sep:show()
@@ -201,7 +235,7 @@ end
 ---@param reverse boolean
 local function vertical_progressive(separator, animate_config, reverse)
     local position = 0
-    if not separator.timer:is_closing() then
+    if separator.timer and not separator.timer:is_closing() then
         separator.timer:stop()
         separator.timer:close()
     end
@@ -232,7 +266,7 @@ end
 ---@param reverse boolean
 local function horizontal_progressive(separator, animate_config, reverse)
     local position = 0
-    if not separator.timer:is_closing() then
+    if separator.timer and not separator.timer:is_closing() then
         separator.timer:stop()
         separator.timer:close()
     end

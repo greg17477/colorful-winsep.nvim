@@ -50,7 +50,9 @@ end
 
 --- vertically initialize the separator window and buffer
 ---@param height integer
-function Separator:vertical_init(height)
+---@param highlight_start boolean?
+---@param highlight_end boolean?
+function Separator:vertical_init(height, highlight_start, highlight_end)
     self.window.height = height
     self.window.width = 1
     local content = { self.start_symbol }
@@ -59,15 +61,64 @@ function Separator:vertical_init(height)
     end
     content[height] = self.end_symbol
     api.nvim_buf_set_lines(self.buffer, 0, -1, false, content)
+
+    local ns_id = api.nvim_create_namespace("colorful-winsep-symbols")
+    api.nvim_buf_clear_namespace(self.buffer, ns_id, 0, -1)
+
+    -- Highlight first line (start)
+    if highlight_start ~= false then
+        -- api.nvim_buf_add_highlight(self.buffer, ns_id, "ColorfulWinSepStart", 0, 0, -1)
+        api.nvim_buf_set_extmark(self.buffer, ns_id, 0, 0, {
+            end_row = 1,
+            end_col = 1,
+            hl_group = "ColorfulWinSepStart",
+        })
+    end
+    -- Highlight last line (end)
+    if highlight_end ~= false then
+        -- api.nvim_buf_add_highlight(self.buffer, ns_id, "ColorfulWinSepEnd", height - 1, 0, -1)
+        api.nvim_buf_set_extmark(self.buffer, ns_id, height - 1, 0, {
+            end_row = height - 1,
+            end_col = 1,
+            hl_group = "ColorfulWinSepEnd",
+        })
+    end
 end
 
 --- horizontally initialize the separator window and buffer
 ---@param width integer
-function Separator:horizontal_init(width)
+---@param highlight_start boolean?
+---@param highlight_end boolean?
+function Separator:horizontal_init(width, highlight_start, highlight_end)
     self.window.height = 1
     self.window.width = width
-    local content = { self.start_symbol .. string.rep(self.body_symbol, width - 2) .. self.end_symbol }
-    api.nvim_buf_set_lines(self.buffer, 0, -1, false, content)
+    local start_text = self.start_symbol
+    local body_text = string.rep(self.body_symbol, width - 2)
+    local end_text = self.end_symbol
+
+    local line_content = start_text .. body_text .. end_text
+    api.nvim_buf_set_lines(self.buffer, 0, -1, false, { line_content })
+
+    -- Apply specific highlights
+    local ns_id = api.nvim_create_namespace("colorful-winsep-symbols")
+    api.nvim_buf_clear_namespace(self.buffer, ns_id, 0, -1)
+
+    -- Highlight start_symbol
+    if highlight_start ~= false then
+        -- api.nvim_buf_add_highlight(self.buffer, ns_id, "ColorfulWinSepStart", 1, 0, #start_text)
+        api.nvim_buf_set_extmark(self.buffer, ns_id, 0, 0, {
+            end_col = #start_text - 1,
+            hl_group = "ColorfulWinSepStart",
+        })
+    end
+    -- Highlight end_symbol
+    if highlight_end ~= false then
+        -- api.nvim_buf_add_highlight(self.buffer, ns_id, "ColorfulWinSepEnd", 0, #line_content - #end_text, 0)
+        api.nvim_buf_set_extmark(self.buffer, ns_id, 0, #line_content - #end_text, {
+            end_col = #line_content - 1,
+            hl_group = "ColorfulWinSepEnd",
+        })
+    end
 end
 
 --- reload the separator window config immediately
@@ -90,7 +141,9 @@ end
 ---@param row integer
 ---@param col integer
 function Separator:shift_move(row, col)
-    local current_row, current_col = unpack(api.nvim_win_get_position(self.winid))
+    -- local current_row, current_col = unpack(api.nvim_win_get_position(self.winid))
+    local pos = api.nvim_win_get_position(self.winid)
+    local current_row, current_col = pos[1], pos[2]
     if not self.timer:is_closing() then
         self.timer:stop()
         self.timer:close()
@@ -134,6 +187,7 @@ function Separator:show()
         else
             api.nvim_set_option_value("winhl", "Normal:WinSeparator", { win = win })
         end
+        api.nvim_set_option_value("winblend", 100, { win = win })
     end
 end
 
