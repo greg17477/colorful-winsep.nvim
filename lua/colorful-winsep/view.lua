@@ -271,6 +271,14 @@ local function horizontal_progressive(separator, animate_config, reverse)
         separator.timer:close()
     end
     separator.timer = vim.uv.new_timer()
+
+    local lines = api.nvim_buf_get_lines(separator.buffer, 0, 1, false)
+    if #lines == 0 then
+        return
+    end
+    local line_content = lines[1]
+    local line_len = #line_content
+
     separator.timer:start(
         1,
         animate_config.horizontal_delay,
@@ -278,12 +286,12 @@ local function horizontal_progressive(separator, animate_config, reverse)
             if separator._show then
                 position = position + 1
                 if reverse then
-                    utils.color(separator.buffer, 1, separator.window.width * 3 - position + 1)
+                    utils.color(separator.buffer, 1, line_len - position + 1)
                 else
                     utils.color(separator.buffer, 1, position)
                 end
             end
-            if position == separator.window.width * 3 and not separator.timer:is_closing() then
+            if position >= line_len and not separator.timer:is_closing() then
                 separator.timer:stop()
                 separator.timer:close()
             end
