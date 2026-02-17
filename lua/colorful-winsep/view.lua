@@ -15,35 +15,66 @@ M.separators = {
 
 ---@param only_2wins boolean we should deal with 2 windows situation
 function M.render_left(only_2wins)
-    local sep_height = fn.winheight(0)
+    -- local sep_height = fn.winheight(0)
+    local sep_height = fn.winheight(0) - config.opts.offset.top
     local pos = api.nvim_win_get_position(0)
     local current_row, current_col = pos[1], pos[2]
-    local anchor_row = current_row
+    -- local anchor_row = current_row
+    local anchor_row = current_row + config.opts.offset.top
     local anchor_col = current_col - 1
     local sep = M.separators.left
-    sep.start_symbol = config.opts.border[2]
+    -- sep.start_symbol = config.opts.border[2]
     sep.body_symbol = config.opts.border[2]
-    sep.end_symbol = config.opts.border[2]
+    -- sep.end_symbol = config.opts.border[2]
+    sep.start_symbol = config.opts.indicator_for_2wins.symbols.start_left
+    sep.end_symbol = config.opts.indicator_for_2wins.symbols.end_left
+
 
     if utils.has_winbar() then
-        sep_height = sep_height + 1
+      anchor_row = anchor_row
+      sep_height = sep_height + 1
+    else
+      -- anchor_row = anchor_row - 1
+      -- sep_height = sep_height + 2
+      anchor_row = anchor_row
+      sep_height = sep_height
     end
 
-    if utils.has_adjacent_win(directions.up) then
-        sep.start_symbol = config.opts.border[3]
-        sep_height = sep_height + 1
+    -- inbetween top and bottom
+    if utils.has_adjacent_win(directions.up) and utils.has_adjacent_win(directions.down) then
+      sep.start_symbol = config.opts.border[3] -- top left corner
+      sep.end_symbol = config.opts.border[5] -- bottom left corner
+
+      anchor_row = anchor_row - 1
+      sep_height = sep_height + 2
+
+    -- top window
+    elseif utils.has_adjacent_win(directions.down) then
+      sep.start_symbol = config.opts.border[3] -- top left corner
+      sep.end_symbol = config.opts.border[5] -- bottom left corner
+
+      if config.opts.offset.top > 0 then
         anchor_row = anchor_row - 1
-    end
-    if utils.has_adjacent_win(directions.down) then
-        sep.end_symbol = config.opts.border[5]
+        sep_height = sep_height + 2
+      else
         sep_height = sep_height + 1
+      end
+
+    -- bottom window
+    elseif utils.has_adjacent_win(directions.up) then
+      sep.start_symbol = config.opts.border[3] -- top left corner
+      sep.end_symbol = config.opts.border[5] -- bottom left corner
+
+      anchor_row = anchor_row
+      sep_height = sep_height + 2
     end
+
 
     local highlight_start = true
     local highlight_end = true
     if only_2wins then
-        anchor_row = sep_height - math.ceil(sep_height / 2)
-        sep_height = math.ceil(sep_height / 2)
+        -- anchor_row = 1
+        -- sep_height = math.ceil(fn.winheight(0) / 2)
         if config.opts.indicator_for_2wins.position == "center" then
             sep.start_symbol = config.opts.indicator_for_2wins.symbols.start_left
             highlight_start = false
@@ -77,22 +108,29 @@ function M.render_down(only_2wins)
     local sep_width = fn.winwidth(0)
     local pos = api.nvim_win_get_position(0)
     local current_row, current_col = pos[1], pos[2]
-    local anchor_row = current_row + fn.winheight(0)
+    -- local anchor_row = current_row + fn.winheight(0)
+    local anchor_row = current_row - 1 + config.opts.offset.top
     local anchor_col = current_col
     local sep = M.separators.down
     sep.start_symbol = config.opts.border[1]
     sep.body_symbol = config.opts.border[1]
     sep.end_symbol = config.opts.border[1]
+    -- sep.start_symbol = config.opts.indicator_for_2wins.symbols.start_up
+    -- sep.end_symbol = config.opts.indicator_for_2wins.symbols.end_up
 
     if utils.has_winbar() then
+      if config.opts.offset.top > 0 then
+        anchor_row = anchor_row
+      else
         anchor_row = anchor_row + 1
+      end
     end
 
     local highlight_start = true
     local highlight_end = true
 
     if only_2wins then
-        sep_width = math.ceil(sep_width / 2)
+        -- sep_width = math.ceil(sep_width / 2)
         if config.opts.indicator_for_2wins.position == "center" then
             sep.end_symbol = config.opts.indicator_for_2wins.symbols.end_down
             highlight_end = false
@@ -128,19 +166,22 @@ function M.render_up(only_2wins)
     local sep_width = fn.winwidth(0)
     local pos = api.nvim_win_get_position(0)
     local current_row, current_col = pos[1], pos[2]
-    local anchor_row = current_row - 1
+    -- local anchor_row = current_row - 1
+    local anchor_row = current_row - 1 + config.opts.offset.top
     local anchor_col = current_col
     local sep = M.separators.up
     sep.start_symbol = config.opts.border[1]
     sep.body_symbol = config.opts.border[1]
     sep.end_symbol = config.opts.border[1]
+    -- sep.start_symbol = config.opts.indicator_for_2wins.symbols.start_up
+    -- sep.end_symbol = config.opts.indicator_for_2wins.symbols.end_up
 
     local highlight_start = true
     local highlight_end = true
 
     if only_2wins then
-        anchor_col = sep_width - math.ceil(sep_width / 2)
-        sep_width = math.ceil(sep_width / 2)
+        -- anchor_col = sep_width - math.ceil(sep_width / 2)
+        -- sep_width = math.ceil(sep_width / 2)
         if config.opts.indicator_for_2wins.position == "center" then
             sep.start_symbol = config.opts.indicator_for_2wins.symbols.start_up
             highlight_start = false
@@ -173,34 +214,66 @@ end
 
 ---@param only_2wins boolean we should deal with 2 windows situation
 function M.render_right(only_2wins)
-    local sep_height = fn.winheight(0)
+    -- local sep_height = fn.winheight(0)
+    local sep_height = fn.winheight(0) - config.opts.offset.top
     local pos = api.nvim_win_get_position(0)
     local current_row, current_col = pos[1], pos[2]
-    local anchor_row = current_row
+    -- local anchor_row = current_row
+    local anchor_row = current_row + config.opts.offset.top
     local anchor_col = current_col + fn.winwidth(0)
     local sep = M.separators.right
-    sep.start_symbol = config.opts.border[2]
+    -- sep.start_symbol = config.opts.border[2]
     sep.body_symbol = config.opts.border[2]
-    sep.end_symbol = config.opts.border[2]
+    -- sep.end_symbol = config.opts.border[2]
+    sep.start_symbol = config.opts.indicator_for_2wins.symbols.start_right
+    sep.end_symbol = config.opts.indicator_for_2wins.symbols.end_right
 
     if utils.has_winbar() then
-        sep_height = sep_height + 1
+      anchor_row = anchor_row
+      sep_height = sep_height + 1
+    else
+      -- anchor_row = anchor_row - 1
+      -- sep_height = sep_height + 2
+      anchor_row = anchor_row
+      sep_height = sep_height
     end
 
-    if utils.has_adjacent_win(directions.up) then
-        sep.start_symbol = config.opts.border[4]
-        sep_height = sep_height + 1
+    -- inbetween top and bottom
+    if utils.has_adjacent_win(directions.up) and utils.has_adjacent_win(directions.down) then
+      sep.start_symbol = config.opts.border[4] -- top right corner
+      sep.end_symbol = config.opts.border[6] -- bottom right corner
+
+      anchor_row = anchor_row - 1
+      sep_height = sep_height + 2
+
+    -- top window
+    elseif utils.has_adjacent_win(directions.down) then
+      sep.start_symbol = config.opts.border[4] -- top right corner
+      sep.end_symbol = config.opts.border[6] -- bottom right corner
+
+      if config.opts.offset.top > 0 then
         anchor_row = anchor_row - 1
-    end
-    if utils.has_adjacent_win(directions.down) then
-        sep.end_symbol = config.opts.border[6]
+        sep_height = sep_height + 2
+      else
         sep_height = sep_height + 1
+      end
+
+    -- bottom window
+    elseif utils.has_adjacent_win(directions.up) then
+      sep.start_symbol = config.opts.border[4] -- top right corner
+      sep.end_symbol = config.opts.border[6] -- bottom right corner
+
+      anchor_row = anchor_row
+      sep_height = sep_height + 2
     end
 
     local highlight_start = true
     local highlight_end = true
     if only_2wins then
-        sep_height = math.ceil(sep_height / 2)
+        -- anchor_row = math.ceil(fn.winheight(0) / 2)
+        -- sep_height = math.ceil(fn.winheight(0) / 2) -- + 1 moves into status line
+        -- anchor_row = 1
+        -- sep_height = math.ceil(fn.winheight(0) / 2) -- + 1 moves into status line
         if config.opts.indicator_for_2wins.position == "center" then
             sep.end_symbol = config.opts.indicator_for_2wins.symbols.end_right
             highlight_end = false

@@ -6,6 +6,7 @@ M.opts = {
     horizontal_separator = "enabled", -- enabled / disabled
     excluded_ft = { "packer", "TelescopePrompt", "mason" },
     highlight = nil, -- nil|string|function. See the docs's Highlights section
+    offset = { top = 0 },
     animate = {
         enabled = "shift", -- false to disable or choose a option below (e.g. "shift") and set option for it if needed
         shift = {
