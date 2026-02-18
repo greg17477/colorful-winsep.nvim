@@ -70,8 +70,8 @@ function Separator:vertical_init(height, highlight_start, highlight_end)
   if highlight_start ~= false then
     api.nvim_buf_set_extmark(self.buffer, ns_id, 0, 0, {
       end_row = 1,
-      -- end_col = #self.start_symbol,
-      end_col = 1,
+      end_col = #self.start_symbol - 1,
+      -- end_col = 1,
       hl_group = "ColorfulWinSepStart",
     })
   end
@@ -79,8 +79,8 @@ function Separator:vertical_init(height, highlight_start, highlight_end)
   if highlight_end ~= false then
     api.nvim_buf_set_extmark(self.buffer, ns_id, height - 1, 0, {
       end_row = height - 1,
-      -- end_col = #self.end_symbol,
-      end_col = 1,
+      end_col = #self.end_symbol - 1,
+      -- end_col = 1,
       hl_group = "ColorfulWinSepEnd",
     })
   end
@@ -90,33 +90,69 @@ end
 ---@param width integer
 ---@param highlight_start boolean?
 ---@param highlight_end boolean?
-function Separator:horizontal_init(width, highlight_start, highlight_end)
+---@param title string?
+function Separator:horizontal_init(width, highlight_start, highlight_end, title)
   self.window.height = 1
   self.window.width = width
-  local start_text = self.start_symbol
-  local body_text = string.rep(self.body_symbol, width - 2)
-  local end_text = self.end_symbol
+  local start_symbol = self.start_symbol
+  local end_symbol = self.end_symbol
+  local body_symbol = self.body_symbol
 
-  local line_content = start_text .. body_text .. end_text
-  api.nvim_buf_set_lines(self.buffer, 0, -1, false, { line_content })
-
-  -- Apply specific highlights
   local ns_id = api.nvim_create_namespace("colorful-winsep-symbols")
   api.nvim_buf_clear_namespace(self.buffer, ns_id, 0, -1)
 
-  -- Highlight start_symbol
+  local line_content = ""
+  local title_start_byte = -1
+  local title_end_byte = -1
+
+  if title and title ~= "" and config.opts.header and config.opts.header.enabled then
+    local display_title = " " .. title .. " "
+    local title_w = vim.fn.strwidth(display_title)
+    local start_w = vim.fn.strwidth(start_symbol)
+    local end_w = vim.fn.strwidth(end_symbol)
+    local body_w = width - start_w - end_w
+
+    if title_w <= body_w then
+      local left_pad_w = math.floor((body_w - title_w) / 2)
+      local right_pad_w = body_w - title_w - left_pad_w
+
+      local left_body = string.rep(body_symbol, left_pad_w)
+      local right_body = string.rep(body_symbol, right_pad_w)
+
+      line_content = start_symbol .. left_body .. display_title .. right_body .. end_symbol
+      title_start_byte = #start_symbol + #left_body
+      title_end_byte = title_start_byte + #display_title
+    else
+      line_content = start_symbol .. string.rep(body_symbol, body_w) .. end_symbol
+    end
+  else
+    local start_w = vim.fn.strwidth(start_symbol)
+    local end_w = vim.fn.strwidth(end_symbol)
+    line_content = start_symbol .. string.rep(body_symbol, width - start_w - end_w) .. end_symbol
+  end
+
+  api.nvim_buf_set_lines(self.buffer, 0, -1, false, { line_content })
+
+  -- Highlight start
   if highlight_start ~= false then
     api.nvim_buf_set_extmark(self.buffer, ns_id, 0, 0, {
-      -- end_col = #start_text,
-      end_col = #start_text - 1,
+      end_col = #start_symbol,
       hl_group = "ColorfulWinSepStart",
     })
   end
-  -- Highlight end_symbol
+
+  -- Highlight title
+  if title_start_byte ~= -1 then
+    api.nvim_buf_set_extmark(self.buffer, ns_id, 0, title_start_byte, {
+      end_col = title_end_byte,
+      hl_group = config.opts.header.highlight or "ColorfulWinSepHeader",
+    })
+  end
+
+  -- Highlight end
   if highlight_end ~= false then
-    api.nvim_buf_set_extmark(self.buffer, ns_id, 0, #line_content - #end_text, {
-      -- end_col = #line_content,
-      end_col = #line_content - 1,
+    api.nvim_buf_set_extmark(self.buffer, ns_id, 0, #line_content - #end_symbol, {
+      end_col = #line_content,
       hl_group = "ColorfulWinSepEnd",
     })
   end
@@ -142,7 +178,6 @@ end
 ---@param row integer
 ---@param col integer
 function Separator:shift_move(row, col)
-  -- local current_row, current_col = unpack(api.nvim_win_get_position(self.winid))
   local pos = api.nvim_win_get_position(self.winid)
   local current_row, current_col = pos[1], pos[2]
   if not self.timer:is_closing() then
