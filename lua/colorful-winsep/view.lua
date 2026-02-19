@@ -58,7 +58,7 @@ function M.render_down(only_2wins)
 
   local title = nil
   if config.opts.header and config.opts.header.enabled then
-    title = fn.getwinvar(0, "colorful_winsep_title", "")
+    title = config.opts.header.default_title or ""
     if title == "" then
       local buf = api.nvim_win_get_buf(0)
       title = fn.fnamemodify(api.nvim_buf_get_name(buf), ":t")
@@ -118,7 +118,7 @@ function M.render_up(only_2wins)
 
   local title = nil
   if config.opts.header and config.opts.header.enabled then
-    title = fn.getwinvar(0, "colorful_winsep_title", "")
+    title = config.opts.header.default_title or ""
     if title == "" then
       local buf = api.nvim_win_get_buf(0)
       title = fn.fnamemodify(api.nvim_buf_get_name(buf), ":t")

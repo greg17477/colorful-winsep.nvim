@@ -9,8 +9,9 @@ M.opts = {
   header = {
     enabled = true,
     highlight = "ColorfulWinSepHeader",
+    default_title = nil,
   },
-  offset = { top = 0 },
+  offset = { top = 1 },
   animate = {
     enabled = "shift",     -- false to disable or choose a option below (e.g. "shift") and set option for it if needed
     shift = {

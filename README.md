@@ -56,6 +56,11 @@ require("colorful-winsep").setup({
     excluded_ft = { "packer", "TelescopePrompt", "mason" },
     highlight = nil, -- nil|string|function. See the docs's Highlights section
     offset = { top = 0 },
+    header = {
+        enabled = true,
+        default_title = nil, -- nil to use the filename as title, else "string"
+        highlight = "ColorfulWinSepHeader",
+    },
     animate = {
         enabled = "shift", -- false to disable, or choose a option below (e.g. "shift") and set option for it if needed
         shift = {
@@ -118,6 +123,7 @@ The plugin uses the following highlight groups:
 - `ColorfulWinSep`: The main highlight group for the window separators.
 - `ColorfulWinSepStart`: The highlight group for the start of the separator (e.g., corners or top of vertical lines).
 - `ColorfulWinSepEnd`: The highlight group for the end of the separator (e.g., corners or bottom of vertical lines).
+- `ColorfulWinSepHeader`: The main highlight group for the window header (title).
 
 
 You can change it using nvim's builtin function or changing the plugin's configuration
