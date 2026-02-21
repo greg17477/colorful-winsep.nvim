@@ -56,13 +56,31 @@ function M.render_down(only_2wins)
     end
   end
 
-  local title = nil
-  if config.opts.header and config.opts.header.enabled then
-    title = config.opts.header.default_title or ""
-    if title == "" then
-      local buf = api.nvim_win_get_buf(0)
-      title = fn.fnamemodify(api.nvim_buf_get_name(buf), ":t")
+  -- local title = nil
+  -- if config.opts.header and config.opts.header.enabled then
+  --   title = config.opts.header.default_title or ""
+  --   if title == "" then
+  --     local buf = api.nvim_win_get_buf(0)
+  --     title = fn.fnamemodify(api.nvim_buf_get_name(buf), ":t")
+  --   end
+  -- end
+
+  local title = config.opts.header and config.opts.header.default_title or ""
+  local win = vim.api.nvim_get_current_win()
+  if title == "" then
+    local ok, win_title = pcall(vim.api.nvim_win_get_var, win, "title")
+    title = (ok and win_title ~= "") and win_title or ""
+  end
+  if title == "" then
+    local wb = vim.api.nvim_get_option_value("winbar", { win = win })
+    if wb ~= "" then
+      local eval = vim.api.nvim_eval_statusline(wb, { winid = win, use_winbar = true })
+      title = eval.str:match("^%s*(.-)%s*$") or ""
     end
+  end
+  if title == "" then
+    local buf = api.nvim_win_get_buf(win)
+    title = fn.fnamemodify(api.nvim_buf_get_name(buf), ":t")
   end
 
   sep:horizontal_init(sep_width, highlight_start, highlight_end, title)
@@ -116,19 +134,36 @@ function M.render_up(only_2wins)
     end
   end
 
-  local title = nil
-  if config.opts.header and config.opts.header.enabled then
-    title = config.opts.header.default_title or ""
-    if title == "" then
-      local buf = api.nvim_win_get_buf(0)
-      title = fn.fnamemodify(api.nvim_buf_get_name(buf), ":t")
+  -- local title = nil
+  -- if config.opts.header and config.opts.header.enabled then
+  --   title = config.opts.header.default_title or ""
+  --   if title == "" then
+  --     local buf = api.nvim_win_get_buf(0)
+  --     title = fn.fnamemodify(api.nvim_buf_get_name(buf), ":t")
+  --   end
+  -- end
+
+  local title = config.opts.header and config.opts.header.default_title or ""
+  local win = vim.api.nvim_get_current_win()
+  if title == "" then
+    local ok, win_title = pcall(vim.api.nvim_win_get_var, win, "title")
+    title = (ok and win_title ~= "") and win_title or ""
+  end
+  if title == "" then
+    local wb = vim.api.nvim_get_option_value("winbar", { win = win })
+    if wb ~= "" then
+      local eval = vim.api.nvim_eval_statusline(wb, { winid = win, use_winbar = true })
+      title = eval.str:match("^%s*(.-)%s*$") or ""
     end
+  end
+  if title == "" then
+    local buf = api.nvim_win_get_buf(win)
+    title = fn.fnamemodify(api.nvim_buf_get_name(buf), ":t")
   end
 
   sep:horizontal_init(sep_width, highlight_start, highlight_end, title)
   if not sep._show then
     sep:move(anchor_row, anchor_col)
-
 
     if config.opts.horizontal_separator == "enabled" then
       sep:show()
